@@ -57,4 +57,80 @@ This document logs design decisions made during development, following the proje
 
 ---
 
+## 2026-01-11: Phase 1 Shakeout Planning
+
+### Decision: Minimal Three-Agent Shakeout (PD-1)
+
+**Context**: Need to validate the architecture before building the full framework.
+
+**Decision**: Phase 1 implements only three agents (ConstraintAgent, StabilityAgent, RealityCheckAgent) with deterministic logic (no LLM).
+
+**Rationale**: 
+- Validates core architecture without LLM complexity
+- Enables fast iteration (< 500ms decisions)
+- LLM integration is a service-layer concern to be added later
+- Sufficient to exercise constraint filtering and robustness scoring
+
+### Decision: Dataclasses Over Pydantic in Core (PD-2)
+
+**Context**: Need type validation in the core, but also need to maintain stdlib-only dependency.
+
+**Decision**: Use stdlib `dataclasses` with `typing.Literal` for type constraints in core. Pydantic may be used in service layer for request/response validation.
+
+**Rationale**:
+- Keeps core dependency-free
+- Pydantic adds unnecessary complexity for internal types
+- Core types can be converted to/from Pydantic models at service boundaries
+- Validates the "stdlib-only" constraint early
+
+### Decision: UUID and Tenant ID Required from Start (PD-3)
+
+**Context**: Future Mímir integration requires IDs and tenant isolation.
+
+**Decision**: All Phase 1 types include `id` (UUID) and relevant types include `tenant_id` as required fields, even though Mímir integration is optional in Phase 1.
+
+**Rationale**:
+- Forces multi-tenancy discipline early
+- Enables provenance tracking from the start
+- Prevents costly refactoring when adding Mímir
+- IDs enable assessment→decision linkage
+
+### Decision: Strict Core Import Boundary Enforcement (PD-4)
+
+**Context**: The "pure core" architecture requires enforcing that core imports nothing from service layer.
+
+**Decision**: Implement CI import scanning that fails if `core/` imports anything outside `core/` and stdlib.
+
+**Rationale**:
+- Technical debt prevention
+- Ensures portability of core
+- Makes boundary violations obvious immediately
+- Validates architectural decisions continuously
+
+### Decision: Test-First with 85% Coverage Target (PD-5)
+
+**Context**: Need confidence that Phase 1 validates the design correctly.
+
+**Decision**: All Phase 1 development follows test-first approach with 85% minimum coverage for core module.
+
+**Rationale**:
+- Tests document expected behavior
+- Enables safe refactoring as design evolves
+- Coverage threshold prevents gaps
+- Unit tests serve as executable specification
+
+### Decision: Eight Concrete Validation Scenarios (PD-6)
+
+**Context**: Need concrete test cases that exercise all agent behaviors and edge cases.
+
+**Decision**: Define 8 scenarios covering: simple choice, hard constraints, high stakes, low reliability, conflicts, all-constrained, single action, and empty observations.
+
+**Rationale**:
+- Comprehensive coverage of behaviors
+- Provides acceptance test suite
+- Documents expected framework behavior
+- Serves as integration test cases
+
+---
+
 *Future decisions will be logged here as development progresses.*
