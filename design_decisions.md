@@ -169,6 +169,25 @@ This document logs design decisions made during development, following the proje
 - Adding explicit timestamp/ID parameters would add complexity without user benefit
 - Tests verify behavior, not implementation details
 
+### Decision: Requirements-Driven Testing (PD-9)
+
+**Context**: Code coverage metrics can drive test creation that serves the metric rather than verification of user needs. Conversely, comprehensive requirement-based testing surfaces code that may not be necessary.
+
+**Decision**: Tests encode requirements. Code coverage is treated as a signal about code health, not test health.
+
+When a test suite verifies all requirements and edge cases, coverage analysis can reveal:
+- Code that serves no verified requirement (candidate for removal)
+- Requirements that lack test coverage (candidate for test addition)
+- Defensive code that should make its purpose explicit
+
+**Guidance**:
+1. Write tests that verify user-visible behaviors and documented requirements
+2. Use coverage to identify code that tests don't exercise, then ask: "What requirement does this serve?"
+3. Prefer deleting unnecessary code over writing tests for unneeded code
+4. When code exists for exceptional conditions, consider whether that condition is testable; if not, document the rationale
+
+**Rationale**: Tests are code, and code is a liability. Tests that exist to satisfy coverage metrics add maintenance burden without adding confidence. Coverage serves best as a tool for identifying code of questionable necessity.
+
 ---
 
 *Future decisions will be logged here as development progresses.*
