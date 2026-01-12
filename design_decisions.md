@@ -133,4 +133,42 @@ This document logs design decisions made during development, following the proje
 
 ---
 
+## 2026-01-11: Testing Philosophy Refinement
+
+### Decision: Functional Tests Over Unit Tests (PD-7)
+
+**Context**: Initial Phase 1 implementation had 119 unit tests covering types, nodes, synth, graph, and runner. Many tested implementation details rather than user-visible behavior.
+
+**Decision**: Replace granular unit tests with minimal functional tests:
+- 5 functional tests (user-visible decision behaviors)
+- 1 architectural test (core import isolation)
+- 1 non-functional test (performance < 500ms)
+
+**Rationale**:
+- Lines of code are a liability, including test code
+- Tests that verify implementation details create rigidity without value
+- Modern tracing makes debugging failures straightforward
+- Tests should verify user-visible behaviors, not internal APIs
+- 7 tests now cover what 119 tests previously covered, with less maintenance burden
+
+**Supersedes**: PD-5 (Test-First with 85% Coverage Target). Coverage percentage is not the goal; verifying actual user behaviors is.
+
+### Decision: Accept Pragmatic Impurity in Core (PD-8)
+
+**Context**: Core uses `datetime.now(UTC)` and `uuid4()` as defaults in dataclasses. These are technically I/O operations.
+
+**Decision**: Accept these as "pragmatic impurity" since they:
+- Don't affect user-visible behavior
+- Don't require external dependencies
+- Don't require mocks for testing (we don't test internal values)
+- Are stdlib-only
+
+**Rationale**: 
+- Pure functional programming is a means, not an end
+- The goal is testable, portable code - achieved
+- Adding explicit timestamp/ID parameters would add complexity without user benefit
+- Tests verify behavior, not implementation details
+
+---
+
 *Future decisions will be logged here as development progresses.*
